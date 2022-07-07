@@ -3,10 +3,9 @@ version: '3'
 services:
     prometheus:
         container_name: prometheus
-        # If running on a 32-bit Raspberry Pi, use:
-        # image: prom/prometheus:v1.7.2
-        build: ./prometheus
+        image: prom/prometheus:v2.36.2
         volumes:
+            - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
             - prometheus_data:/prometheus
         command:
             - '--config.file=/etc/prometheus/prometheus.yml'
@@ -17,15 +16,16 @@ services:
         ports:
             - "9090:9090"
         restart: on-failure
-    node-exporter:
-        container_name: node-exporter
-        image: prom/node-exporter-linux-armv7
+    hubitat2prom:
+        container_name: hubitat2prom
+        image: aholmes0/hubitat2prom@sha256:48dbe0cd8aea27fc6b734b81dd64251e48835ec14869f3ce82a734d993f08c29
+        env_file:
+            - .env
         ports:
-            - "9100:9100"
-        restart: on-failure
+            - "8080:80"
     grafana:
         container_name: grafana
-        image: grafana/grafana:latest
+        image: grafana/grafana:9.0.2
         environment:
             - GF_SECURITY_ADMIN_PASSWORD=password
             - GF_AUTH_ANONYMOUS_ENABLED=true
@@ -38,14 +38,6 @@ services:
             - prometheus
         ports:
             - "3000:3000"
-        restart: on-failure
-    alertmanager:
-        container_name: alertmanager
-        build: ./alertmanager
-        command:
-            - '--config.file=/alertmanager.yml'
-        ports:
-            - "9093:9093"
         restart: on-failure
 volumes:
     prometheus_data: {}
