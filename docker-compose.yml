@@ -23,6 +23,7 @@ services:
             - .env
         ports:
             - "8080:80"
+        restart: on-failure
     grafana:
         container_name: grafana
         image: grafana/grafana:9.0.2
